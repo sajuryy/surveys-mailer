@@ -11,56 +11,81 @@ passport.serializeUser((user, done) => {
 
 });
 
-passport.deserializeUser((id, done) => {
-    User.findById(id).then(user => {
-        done(null, user)
-    });
+passport.deserializeUser(async (id, done) => {
+    const user = await User.findById(id);
+    done(null, user);
 });
 
-passport.use(new GoogleStrategy({
+// passport.use(new GoogleStrategy({
+//     clientID: keys.googleClientID,
+//     clientSecret: keys.googleClientSecter,
+//     callbackURL: '/auth/google/callback'
+// }, (accessToken, refreshToken, profile, done) => {
+//     User.findOne({
+//         googleId: profile.id
+//     }, (err, user) => {
+//         if (err) {
+//             return done(err)
+//         }
+
+//         if (user) {
+//             console.log(`user ${user} exists in bd`)
+//         } else {
+//             const newUser = new User({
+//                 googleId: profile.id
+//             })
+//             newUser.save();
+//             console.log('new user');
+//             done(null, user);
+//         }
+//     });
+// }
+
+// passport.use(new GoogleStrategy(
+//     {
+//         clientID: keys.googleClientID,
+//         clientSecret: keys.googleClientSecter,
+//         callbackURL: '/auth/google/callback'
+//     },
+//     (accessToken, refreshToken, profile, done) => {
+//         User.findOne({
+//             googleId: profile.id
+//         }).then((existingUser) => {
+
+//             if (existingUser) {
+//                 done(null, existingUser)
+//             } else {
+//                 new User({ googleId: profile.id })
+//                     .save()
+//                     .then((user) => {
+//                         done(null, user);
+//                     });
+//             }
+//         });
+//     }
+// ));         
+
+passport.use(new GoogleStrategy(
+    {
         clientID: keys.googleClientID,
         clientSecret: keys.googleClientSecter,
         callbackURL: '/auth/google/callback'
-    }, (accessToken, refreshToken, profile, done) => {
-        User.findOne({
+    },
+    async (accessToken, refreshToken, profile, done) => {
+        const user = await User.findOne({
             googleId: profile.id
-        }, (err, user) => {
-            if (err) {
-                return done(err)
-            }
-
-            if (user) {
-                console.log(`user ${user} exists in bd`)
-            } else {
-                const newUser = new User({
-                    googleId: profile.id
-                })
-                newUser.save();
-                console.log('new user regestered');
-                done(null, user);
-            }
         });
+
+        if (user) {
+            return done(null, user)
+        } else {
+            const newUser = await new User({ googleId: profile.id })
+            newUser.save();
+
+            return done(null, newUser);
+
+        }
     }
-
-
-
-
-
-
-    // async (accessToken, refreshToken, profile, done) => {
-    //     const user = await User.findOne({
-    //         googleId: profile.id
-    //     });
-    //     if (user) {
-    //         console.log(`there is such user ${user}`);
-    //         done(null, user)
-    //     } else {
-    //         const newUser = new User({
-    //             googleId: profile.id
-    //         })
-    // newUser.save();
-    //         done(null, user);
-    //     }
-    // }
-
 ));
+
+

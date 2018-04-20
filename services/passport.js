@@ -69,7 +69,9 @@ passport.use(new GoogleStrategy(
     {
         clientID: keys.googleClientID,
         clientSecret: keys.googleClientSecter,
-        callbackURL: '/auth/google/callback'
+        callbackURL: '/auth/google/callback',
+        proxy: true
+
     },
     async (accessToken, refreshToken, profile, done) => {
         const user = await User.findOne({

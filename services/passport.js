@@ -16,54 +16,6 @@ passport.deserializeUser(async (id, done) => {
     done(null, user);
 });
 
-// passport.use(new GoogleStrategy({
-//     clientID: keys.googleClientID,
-//     clientSecret: keys.googleClientSecter,
-//     callbackURL: '/auth/google/callback'
-// }, (accessToken, refreshToken, profile, done) => {
-//     User.findOne({
-//         googleId: profile.id
-//     }, (err, user) => {
-//         if (err) {
-//             return done(err)
-//         }
-
-//         if (user) {
-//             console.log(`user ${user} exists in bd`)
-//         } else {
-//             const newUser = new User({
-//                 googleId: profile.id
-//             })
-//             newUser.save();
-//             console.log('new user');
-//             done(null, user);
-//         }
-//     });
-// }
-
-// passport.use(new GoogleStrategy(
-//     {
-//         clientID: keys.googleClientID,
-//         clientSecret: keys.googleClientSecter,
-//         callbackURL: '/auth/google/callback'
-//     },
-//     (accessToken, refreshToken, profile, done) => {
-//         User.findOne({
-//             googleId: profile.id
-//         }).then((existingUser) => {
-
-//             if (existingUser) {
-//                 done(null, existingUser)
-//             } else {
-//                 new User({ googleId: profile.id })
-//                     .save()
-//                     .then((user) => {
-//                         done(null, user);
-//                     });
-//             }
-//         });
-//     }
-// ));         
 
 passport.use(new GoogleStrategy({
         clientID: keys.googleClientID,

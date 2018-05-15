@@ -4,7 +4,7 @@ import formFields from './formFields';
 import _ from 'lodash';
 import * as actions from '../../actions';
 
-const SurveyFormReview = ({ onCancel, formValues, submitSurvey }) => {
+const SurveyFormReview = ({ onCancel, formValues }) => {
 
     const reviewFields = _.map(formFields, ({ name, label }) => {
         return (
@@ -23,7 +23,7 @@ const SurveyFormReview = ({ onCancel, formValues, submitSurvey }) => {
             <h5>Please confirm your entries</h5>
             {reviewFields}
             <button
-                onClick={() => submitSurvey(formValues)}
+                // onClick={() => submitSurvey(formValues)}
                 className="yellow darken-3 btn-flat white-text" onClick={onCancel}>
                 Back
             </button>

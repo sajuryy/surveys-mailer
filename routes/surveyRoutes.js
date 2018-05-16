@@ -11,7 +11,13 @@ const Survey = mongoose.model('surveys');
 
 module.exports = (app) => {
 
-    app.get('/api/surveys/thx', (req, res) => {
+    app.get('/api/surveys', requireLogin, async (req, res) => {
+        const surveys = await Survey.find({ _user: req.user.id });
+
+        res.send(surveys);
+    });
+
+    app.get('/api/surveys/:surveyId/:choice', (req, res) => {
         res.send('THX');
     });
 
@@ -42,24 +48,48 @@ module.exports = (app) => {
     });
 
     app.post('/api/surveys/webhooks', (req, res) => {
-        const events = _.map(req.body, ({ email, url }) => { //event.email, event.url
-            const pathname = new URL(url).pathname;
-            const p = new Path('/api/surveys/:surveyId/:choice');
-            const match = p.test(pathname);
+        // const p = new Path('/api/surveys/:surveyId/:choice');
+        // const events = _.map(req.body, event => {    
+        //     const match = p.test(new URL(event.url).pathname);
+        //     if (match) {
+        //         return { email: event.email, surveyId: match.surveyId, choice: match.choice };
+        //     }
+        // });
+        // // console.log(events);
+        // const compactEvents = _.compact(events);
+        // // console.log(compactEvents);
+        // const uniqueEvents = _.uniqBy(compactEvents, 'email', 'surveyId');
+        // console.log(uniqueEvents);
 
-            if (match) {
-                return {
-                    email,
-                    surveyId: match.surveyId,
-                    choice: match.choice
+        const p = new Path('/api/surveys/:surveyId/:choice');
+
+        _.chain(req.body)
+            .map(event => {
+                const match = p.test(new URL(event.url).pathname);
+                if (match) {
+                    return { email: event.email, surveyId: match.surveyId, choice: match.choice };
                 }
-            }
-            const compactEvents = _.compact(events);
-            const uniqueEvents = _.uniqBy(compactEvents, 'email', 'surveyId');
-            console.log(uniqueEvents);
+            })
+            .compact()
+            .uniqBy('email', 'surveyId')
+            .each(({ surveyId, email, choice }) => {
+                Survey.updateOne(
+                    {
+                        _id: surveyId,
+                        recipients: {
+                            $elemMatch: { email: email, responded: false }
+                        }
+                    },
+                    {
+                        $inc: { [choice]: 1 },
+                        $set: { 'recipients.$.responded': true },
+                        lastResponded: new Date()
+                    }
+                ).exec()
+            })
+            .value();
 
-            res.send({});
-        });
+        res.send({});
 
     });
 };

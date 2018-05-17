@@ -12,7 +12,8 @@ const Survey = mongoose.model('surveys');
 module.exports = (app) => {
 
     app.get('/api/surveys', requireLogin, async (req, res) => {
-        const surveys = await Survey.find({ _user: req.user.id });
+        const surveys = await Survey.find({ _user: req.user.id })
+            .select({ recipients: false });
 
         res.send(surveys);
     });
@@ -48,26 +49,14 @@ module.exports = (app) => {
     });
 
     app.post('/api/surveys/webhooks', (req, res) => {
-        // const p = new Path('/api/surveys/:surveyId/:choice');
-        // const events = _.map(req.body, event => {    
-        //     const match = p.test(new URL(event.url).pathname);
-        //     if (match) {
-        //         return { email: event.email, surveyId: match.surveyId, choice: match.choice };
-        //     }
-        // });
-        // // console.log(events);
-        // const compactEvents = _.compact(events);
-        // // console.log(compactEvents);
-        // const uniqueEvents = _.uniqBy(compactEvents, 'email', 'surveyId');
-        // console.log(uniqueEvents);
 
         const p = new Path('/api/surveys/:surveyId/:choice');
 
         _.chain(req.body)
-            .map(event => {
-                const match = p.test(new URL(event.url).pathname);
+            .map(({ url, email }) => {
+                const match = p.test(new URL(url).pathname);
                 if (match) {
-                    return { email: event.email, surveyId: match.surveyId, choice: match.choice };
+                    return { email: email, surveyId: match.surveyId, choice: match.choice };
                 }
             })
             .compact()

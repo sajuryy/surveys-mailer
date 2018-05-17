@@ -26,7 +26,7 @@ class SurveyList extends Component {
                     <a>Yes: {survey.yes}</a>
                     <a>No: {survey.no}</a>
                     </div>
-                </div>
+                </div>  
             )
         })
     }
